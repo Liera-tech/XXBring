@@ -19,6 +19,8 @@ allprojects {
 
 
 2.添加依赖到moudle
+
+
 dependencies {
 
         implementation 'com.github.Liera-tech:XXBring:0.1.0'
