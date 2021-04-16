@@ -27,6 +27,7 @@ XXBring mXXBring = new XXBring.Builder()
  * @param req      请求体
  * @param callback inputStream回调
  */
+ 
 mXXBring.request(IXXBringRequest req, XXBringInputStreamCallback callback);
 
 /**
@@ -35,6 +36,7 @@ mXXBring.request(IXXBringRequest req, XXBringInputStreamCallback callback);
  * @param req      请求体
  * @param callback byteArray回调
  */
+ 
 mXXBring.request(IXXBringRequest req, XXBringByteArrayCallback callback);
 
 /**
@@ -43,6 +45,7 @@ mXXBring.request(IXXBringRequest req, XXBringByteArrayCallback callback);
  * @param req      请求体
  * @param callback text回调
  */
+ 
 mXXBring.request(IXXBringRequest req, XXBringTextCallback callback);
 
 /**
@@ -52,6 +55,7 @@ mXXBring.request(IXXBringRequest req, XXBringTextCallback callback);
  * @param respClass object字节码
  * @param callback  jsonObject回调
  */
+ 
 mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClass, XXBringJsonObjectCallback callback);
 
 /**
@@ -61,10 +65,12 @@ mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClas
  * @param respClass object字节码
  * @param callback  jsonArray回调
  */
+ 
 mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClass, XXBringJsonArrayCallback callback);
 
 
 请求支持以下情况:
+
 XXBringFileUploadRequest(文件上传请求)
 XXBringGetRequest(Get请求)
 XXBringPostBodyRequest(post请求发送Json数据)
@@ -72,6 +78,7 @@ XXBringPostParmeterRequest(post请求携带参数)
 
 
 响应回调支持如下类型:
+
 XXBringByteArrayCallback(响应结果为byte数组)
 XXBringInputStreamCallback(响应结果为InputStream数据流)
 XXBringJsonArrayCallback(响应结果为json数组)
@@ -84,29 +91,34 @@ XXBringTextCallback(响应结果为纯文本)
  * 请求地址
  * @return
  */
+ 
 String getUrl();
 
 /**
  * 为请求设置一个tag
  * @return
  */
+ 
 Object getRequestTag();
 /**
  * 请求方式
  * @return
  */
+ 
 HttpMethod getMethod();
 
 /**
  * 请求头
  * @return
  */
+ 
 Map<String, Object> getHeaders();
 
 /**
  * 请求参数
  * @return
  */
+ 
 Map<String, Object> getParameters();
 
 
@@ -118,6 +130,7 @@ Map<String, Object> getParameters();
  *
  * @return
  */
+ 
 boolean isResponseSuccessThread();
 
 /**
@@ -128,6 +141,7 @@ boolean isResponseSuccessThread();
  *
  * @return
  */
+ 
 boolean isResponseFailThread();
 
 /**
@@ -135,4 +149,5 @@ boolean isResponseFailThread();
  * 是否查看json字符串数据(效率稍低)
  * @return
  */
+ 
 boolean isShowJsonData();
