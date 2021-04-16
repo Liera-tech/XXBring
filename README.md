@@ -4,13 +4,21 @@
 使用方法:
 
 //配置请求,这个可以放到一个统一的地方
+
 XXBring mXXBring = new XXBring.Builder()
+
         //是否打印日志,默认debug版本打印日志,非debug版本不打印
+        
         .setDebug(true)
+        
         //设置自己的请求网络框架,不设置默认是okhttp请求
+        
         //.setRequestManager()
+        
         //是否打印全局请求json数据,默认是debug版本打印,非debug版本不打印
+        
         //.isShowJsonData(false)
+        
         .build();
 
 /**
