@@ -2,6 +2,7 @@
 一款基于okhttp实现的网络请求响应框架,支持get/post请求/json解析/流数据处理/文件下载等.
 
 使用方法:
+
 //配置请求,这个可以放到一个统一的地方
 XXBring mXXBring = new XXBring.Builder()
         //是否打印日志,默认debug版本打印日志,非debug版本不打印
