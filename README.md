@@ -6,16 +6,23 @@
 1.将JitPack存储库添加到项目根目录的build.gradle中
 
 allprojects {
+
         repositories {
+        
                 ...
+                
                 maven { url 'https://jitpack.io' }
+                
         }
+        
 }
 
 
 2.添加依赖到moudle
 dependencies {
+
         implementation 'com.github.Liera-tech:XXBring:0.1.0'
+        
 }
 
 
