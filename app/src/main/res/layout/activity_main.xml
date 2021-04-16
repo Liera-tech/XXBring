@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/get_to_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Get请求获取text数据"/>
+
+    <Button
+        android:id="@+id/get_to_inputStream"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Get请求获取inputStream数据流"/>
+
+    <Button
+        android:id="@+id/post_to_jsonObject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="post请求响应jsonObject数据"/>
+
+    <Button
+        android:id="@+id/post_to_jsonArray"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="post请求响应jsonArray数据"/>
+
+    <Button
+        android:id="@+id/post_to_upload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="post上传文件"/>
+
+</LinearLayout>

@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.liera.lib_xxbring">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application>
+        <provider android:name="com.liera.lib_xxbring.providers.XXBringProvider" android:authorities="lib_bring" />
+    </application>
+</manifest>
