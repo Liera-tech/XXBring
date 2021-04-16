@@ -273,7 +273,7 @@ public class OkHttpRequestManager extends RequestManager implements Callback {
     public static void cancel(Object... requestTag) {
         //正在排队的call
         List<Call> calls = okHttpClient.dispatcher().queuedCalls();
-        if (calls != null && !calls.isEmpty())
+        if (!calls.isEmpty())
             for (Call call : calls) {
                 if (requestTag != null) {
                     for (Object o : requestTag) {
@@ -289,7 +289,7 @@ public class OkHttpRequestManager extends RequestManager implements Callback {
             }
         //正在执行的call
         List<Call> calls1 = okHttpClient.dispatcher().runningCalls();
-        if (calls1 != null && !calls1.isEmpty())
+        if (!calls1.isEmpty())
             for (Call call : calls1) {
                 if (requestTag != null) {
                     for (Object o : requestTag) {
