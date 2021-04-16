@@ -30,6 +30,7 @@ XXBring mXXBring = new XXBring.Builder()
 mXXBring.request(IXXBringRequest req, XXBringInputStreamCallback callback);
 
 
+
  * 回调为byteArray类型的请求
  *
  * @param req      请求体
@@ -38,12 +39,14 @@ mXXBring.request(IXXBringRequest req, XXBringInputStreamCallback callback);
 mXXBring.request(IXXBringRequest req, XXBringByteArrayCallback callback);
 
 
+
  * 回调为text类型的请求
  *
  * @param req      请求体
  * @param callback text回调
  
 mXXBring.request(IXXBringRequest req, XXBringTextCallback callback);
+
 
 
  * 回调为jsonObject类型的请求
@@ -55,6 +58,7 @@ mXXBring.request(IXXBringRequest req, XXBringTextCallback callback);
 mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClass, XXBringJsonObjectCallback callback);
 
 
+
  * 回调为jsonArray类型的请求
  *
  * @param req       请求体
@@ -62,6 +66,7 @@ mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClas
  * @param callback  jsonArray回调
  
 mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClass, XXBringJsonArrayCallback callback);
+
 
 
 请求支持以下情况:
@@ -82,67 +87,66 @@ XXBringTextCallback(响应结果为纯文本)
 
 
 请求中可通过配置请求设置以下:
-/**
+
  * 请求地址
  * @return
- */
  
 String getUrl();
 
-/**
+
+
  * 为请求设置一个tag
  * @return
- */
  
 Object getRequestTag();
-/**
+
+
+
  * 请求方式
  * @return
- */
  
 HttpMethod getMethod();
 
-/**
+
+
  * 请求头
  * @return
- */
  
 Map<String, Object> getHeaders();
 
-/**
+
+
  * 请求参数
  * @return
- */
  
 Map<String, Object> getParameters();
 
 
-/**
+
  * 响应数据成功是否在子线程
  *
  * true 响应成功内容在子线程
  * false 响应成功内容在主线程
  *
  * @return
- */
  
 boolean isResponseSuccessThread();
 
-/**
+
+
  * 响应数据失败是否在子线程
  *
  * true 响应失败在子线程
  * false 响应失败在主线程
  *
  * @return
- */
  
 boolean isResponseFailThread();
 
-/**
+
+
  * 响应数据为json格式时有效
  * 是否查看json字符串数据(效率稍低)
  * @return
- */
  
 boolean isShowJsonData();
