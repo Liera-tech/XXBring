@@ -21,50 +21,45 @@ XXBring mXXBring = new XXBring.Builder()
         
         .build();
 
-/**
+
  * 回调为inputStream类型的请求
  *
  * @param req      请求体
  * @param callback inputStream回调
- */
  
 mXXBring.request(IXXBringRequest req, XXBringInputStreamCallback callback);
 
-/**
+
  * 回调为byteArray类型的请求
  *
  * @param req      请求体
  * @param callback byteArray回调
- */
  
 mXXBring.request(IXXBringRequest req, XXBringByteArrayCallback callback);
 
-/**
+
  * 回调为text类型的请求
  *
  * @param req      请求体
  * @param callback text回调
- */
  
 mXXBring.request(IXXBringRequest req, XXBringTextCallback callback);
 
-/**
+
  * 回调为jsonObject类型的请求
  *
  * @param req       请求体
  * @param respClass object字节码
  * @param callback  jsonObject回调
- */
  
 mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClass, XXBringJsonObjectCallback callback);
 
-/**
+
  * 回调为jsonArray类型的请求
  *
  * @param req       请求体
  * @param respClass object字节码
  * @param callback  jsonArray回调
- */
  
 mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClass, XXBringJsonArrayCallback callback);
 
