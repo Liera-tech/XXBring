@@ -29,6 +29,7 @@ dependencies {
 
 
 API使用：
+
 //配置请求,这个可以放到一个统一的地方
 
 XXBring mXXBring = new XXBring.Builder()
