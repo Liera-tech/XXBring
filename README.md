@@ -1,8 +1,25 @@
 # XXBring
 一款基于okhttp实现的网络请求响应框架,支持get/post请求/json解析/流数据处理/文件下载等.
 
-使用方法:
+如何集成到项目？
 
+1.将JitPack存储库添加到项目根目录的build.gradle中
+
+allprojects {
+        repositories {
+                ...
+                maven { url 'https://jitpack.io' }
+        }
+}
+
+
+2.添加依赖到moudle
+dependencies {
+        implementation 'com.github.Liera-tech:XXBring:0.1.0'
+}
+
+
+API使用：
 //配置请求,这个可以放到一个统一的地方
 
 XXBring mXXBring = new XXBring.Builder()
