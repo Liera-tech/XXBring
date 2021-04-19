@@ -38,9 +38,21 @@ XXBring mXXBring = new XXBring.Builder()
         
         .setDebug(true)
         
-        //设置自己的请求网络框架,不设置默认是okhttp请求
-        
-        //.setRequestManager()
+        //不设置请求器,默认是okhttp请求网络
+
+//        .setRequestManagerFactory(new RequestManagerFactory() {
+
+//            @Override
+
+//            public RequestManager create() {
+
+//                //使用okhttp请求
+
+//                return new OkHttpRequestManager();
+
+//            }
+
+//        })
         
         //是否打印全局请求json数据,默认是debug版本打印,非debug版本不打印
         
