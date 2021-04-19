@@ -96,6 +96,8 @@ mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClas
 
 
 
+
+
 请求支持以下情况:
 
 XXBringFileUploadRequest(文件上传请求)
@@ -105,6 +107,8 @@ XXBringGetRequest(Get请求)
 XXBringPostBodyRequest(post请求发送Json数据)
 
 XXBringPostParmeterRequest(post请求携带参数)
+
+
 
 
 响应回调支持如下类型:
@@ -118,6 +122,8 @@ XXBringJsonArrayCallback(响应结果为json数组)
 XXBringJsonObjectCallback(响应结果为json对象)
 
 XXBringTextCallback(响应结果为纯文本)
+
+
 
 
 请求中可通过配置请求设置以下:
