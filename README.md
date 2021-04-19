@@ -23,7 +23,7 @@ allprojects {
 
 dependencies {
 
-        implementation 'com.github.Liera-tech:XXBring:0.1.0'
+        implementation 'com.github.Liera-tech:XXBring:0.2.0'
         
 }
 
