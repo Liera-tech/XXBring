@@ -14,6 +14,10 @@ public interface ErrCode {
     int REQUEST_EXCEPTION_NOT_REQUEST = 1005;
     //媒体文件不存在
     int REQUEST_EXCEPTION_FILE_NOT_FOUND = 1006;
+    //请求连接失败
+    int REQUEST_EXCEPTION_INTERNET_FAIL = 1007;
+    //请求数据写入失败
+    int REQUEST_EXCEPTION_WRITE_DATA_FAIL = 1008;
 
     //响应失败
     int RESPONSE_EXCEPTION_FAIL = 2000;

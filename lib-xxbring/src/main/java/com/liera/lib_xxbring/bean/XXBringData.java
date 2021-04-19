@@ -21,6 +21,7 @@ import com.liera.lib_xxbring.request.IXXBringRequest;
 import com.liera.lib_xxbring.response.IXXBringResponse;
 import com.liera.lib_xxbring.util.ErrCode;
 import com.liera.lib_xxbring.util.XXBringLog;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -51,10 +52,18 @@ public class XXBringData {
         return req;
     }
 
+    public XXBringBaseCallback getCallback() {
+        return callback;
+    }
+
+    public boolean isShowJsonData() {
+        return isShowJsonData;
+    }
+
     public void execute() {
         if (req.getRequestTag() == null) {
             XXBringLog.i(TAG, "请求没有设置tag");
-            callback.responseFail(req, ErrCode.REQUEST_EXCEPTION_NOT_INTERNET, new Exception("请求未设置tag"),mHandler);
+            callback.responseFail(req, ErrCode.REQUEST_EXCEPTION_NOT_INTERNET, new Exception("请求未设置tag"), mHandler);
             return;
         }
         if (!XXBring.checkNet()) {
@@ -63,7 +72,6 @@ public class XXBringData {
             return;
         }
         XXBringLog.i(TAG, "开始任务,tag:" + req.getRequestTag());
-        if (requestManager == null) requestManager = OkHttpRequestManager.create();
         requestManager.execute(this);
     }
 
@@ -79,38 +87,14 @@ public class XXBringData {
             return;
         }
         XXBringLog.i(TAG, "响应失败,回调子线程tag:" + req.getRequestTag());
-        callback.responseFail(req, errCode, e,mHandler);
+        callback.responseFail(req, errCode, e, mHandler);
     }
 
-    public void responseSuccess(ResponseBody body, final Gson mGson) {
+    public void responseJsonReader(Reader reader, Gson mGson) {
         if (callback instanceof XXBringJsonObjectCallback) {
-            XXBringLog.i(TAG, "jsonObject回调tag:" + req.getRequestTag());
             final XXBringJsonObjectCallback back = (XXBringJsonObjectCallback) callback;
-
-            if (!req.isShowJsonData() || !isShowJsonData) {
-                try {
-                    Reader reader = body.charStream();
-                    final IXXBringResponse ixxBringResponse = mGson.fromJson(reader, respClass);
-                    if (!req.isResponseSuccessThread()) {
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                back.jsonResponseObjectSuccess(req, ixxBringResponse, mHandler);
-                            }
-                        });
-                        return;
-                    }
-                    back.jsonResponseObjectSuccess(req, ixxBringResponse, mHandler);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    responseFail(ErrCode.RESPONSE_EXCEPTION_STRING, e);
-                }
-                return;
-            }
             try {
-                String string = body.string();
-                XXBringLog.i(TAG, "tag:" + req.getRequestTag() + "响应数据:%s", string);
-                final IXXBringResponse ixxBringResponse = mGson.fromJson(string, respClass);
+                final IXXBringResponse ixxBringResponse = mGson.fromJson(reader, respClass);
                 if (!req.isResponseSuccessThread()) {
                     mHandler.post(new Runnable() {
                         @Override
@@ -121,41 +105,52 @@ public class XXBringData {
                     return;
                 }
                 back.jsonResponseObjectSuccess(req, ixxBringResponse, mHandler);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 responseFail(ErrCode.RESPONSE_EXCEPTION_STRING, e);
             }
             return;
         }
         if (callback instanceof XXBringJsonArrayCallback) {
-            XXBringLog.i(TAG, "jsonArray回调tag:" + req.getRequestTag());
             final XXBringJsonArrayCallback back = (XXBringJsonArrayCallback) callback;
-
-            if (!req.isShowJsonData() || !isShowJsonData) {
-                try {
-                    Reader reader = body.charStream();
-
-                    final ArrayList<? extends IXXBringResponse> m = jsonToList(mGson, reader, respClass);
-                    if (!req.isResponseSuccessThread()) {
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                back.jsonResponseArraySuccess(req, m, mHandler);
-                            }
-                        });
-                        return;
-                    }
-                    back.jsonResponseArraySuccess(req, m, mHandler);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    responseFail(ErrCode.RESPONSE_EXCEPTION_STRING, e);
+            try {
+                final ArrayList<? extends IXXBringResponse> m = jsonToList(mGson, reader, respClass);
+                if (!req.isResponseSuccessThread()) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            back.jsonResponseArraySuccess(req, m, mHandler);
+                        }
+                    });
+                    return;
                 }
+                back.jsonResponseArraySuccess(req, m, mHandler);
+            } catch (Exception e) {
+                e.printStackTrace();
+                responseFail(ErrCode.RESPONSE_EXCEPTION_STRING, e);
+            }
+        }
+    }
+
+    public void responseData(final String string, Gson mGson) {
+        if (callback instanceof XXBringJsonObjectCallback) {
+            final XXBringJsonObjectCallback back = (XXBringJsonObjectCallback) callback;
+            final IXXBringResponse ixxBringResponse = mGson.fromJson(string, respClass);
+            if (!req.isResponseSuccessThread()) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        back.jsonResponseObjectSuccess(req, ixxBringResponse, mHandler);
+                    }
+                });
                 return;
             }
+            back.jsonResponseObjectSuccess(req, ixxBringResponse, mHandler);
+            return;
+        }
+        if (callback instanceof XXBringJsonArrayCallback) {
+            final XXBringJsonArrayCallback back = (XXBringJsonArrayCallback) callback;
             try {
-                String string = body.string();
-                XXBringLog.i(TAG, "tag:" + req.getRequestTag() + "响应数据:%s", string);
-
                 final ArrayList<? extends IXXBringResponse> m = jsonToList(mGson, string, respClass);
                 if (!req.isResponseSuccessThread()) {
                     mHandler.post(new Runnable() {
@@ -167,7 +162,7 @@ public class XXBringData {
                     return;
                 }
                 back.jsonResponseArraySuccess(req, m, mHandler);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 responseFail(ErrCode.RESPONSE_EXCEPTION_STRING, e);
             }
@@ -176,71 +171,55 @@ public class XXBringData {
         if (callback instanceof XXBringTextCallback) {
             XXBringLog.i(TAG, "text回调tag:" + req.getRequestTag());
             final XXBringTextCallback back = (XXBringTextCallback) callback;
-            try {
-                final String string = body.string();
+            if (!req.isResponseSuccessThread()) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        back.textResponseSuccess(req, string, mHandler);
+                    }
+                });
+                return;
+            }
+            back.textResponseSuccess(req, string, mHandler);
+            return;
+        }
+    }
 
-                XXBringLog.i(TAG, "tag:" + req.getRequestTag() + "响应数据:%s", string);
-                if (!req.isResponseSuccessThread()) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            back.textResponseSuccess(req, string, mHandler);
-                        }
-                    });
-                    return;
+    public void responseByteArray(final byte[] bytes) {
+        final XXBringByteArrayCallback back = (XXBringByteArrayCallback) callback;
+        if (!req.isResponseSuccessThread()) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    back.byteArrayResponseSuccess(req, bytes, mHandler);
                 }
-                back.textResponseSuccess(req, string, mHandler);
-            } catch (IOException e) {
-                e.printStackTrace();
-                responseFail(ErrCode.RESPONSE_EXCEPTION_STRING, e);
-                return;
-            }
+            });
             return;
         }
-        if (callback instanceof XXBringByteArrayCallback) {
-            XXBringLog.i(TAG, "byteArray回调tag:" + req.getRequestTag());
-            final XXBringByteArrayCallback back = (XXBringByteArrayCallback) callback;
-            try {
-                final byte[] bytes = body.bytes();
-                if (!req.isResponseSuccessThread()) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            back.byteArrayResponseSuccess(req, bytes, mHandler);
-                        }
-                    });
-                    return;
-                }
-                back.byteArrayResponseSuccess(req, bytes, mHandler);
-            } catch (IOException e) {
-                e.printStackTrace();
-                responseFail(ErrCode.RESPONSE_EXCEPTION_BYTE_ARRAY, e);
+        back.byteArrayResponseSuccess(req, bytes, mHandler);
+    }
+
+    public void responseInputStream(final InputStream inputStream) {
+        final XXBringInputStreamCallback back = (XXBringInputStreamCallback) callback;
+        try {
+            if (!req.isResponseSuccessThread()) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        back.inputStreamResponseSuccess(req, inputStream, mHandler);
+                    }
+                });
                 return;
             }
+            back.inputStreamResponseSuccess(req, inputStream, mHandler);
+        } catch (Exception e) {
+            e.printStackTrace();
+            responseFail(ErrCode.RESPONSE_EXCEPTION_INPUT_STREAM, e);
             return;
         }
-        if (callback instanceof XXBringInputStreamCallback) {
-            XXBringLog.i(TAG, "inputStream回调tag:" + req.getRequestTag());
-            final XXBringInputStreamCallback back = (XXBringInputStreamCallback) callback;
-            try {
-                final InputStream inputStream = body.byteStream();
-                if (!req.isResponseSuccessThread()) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            back.inputStreamResponseSuccess(req, inputStream, mHandler);
-                        }
-                    });
-                    return;
-                }
-                back.inputStreamResponseSuccess(req, inputStream, mHandler);
-            } catch (Exception e) {
-                e.printStackTrace();
-                responseFail(ErrCode.RESPONSE_EXCEPTION_INPUT_STREAM, e);
-                return;
-            }
-            return;
-        }
+    }
+
+    public void responseOther() {
         callback.responseFail(req, ErrCode.RESPONSE_EXCEPTION_SUCCESS, new Exception("响应回调类型未定义"), mHandler);
     }
 

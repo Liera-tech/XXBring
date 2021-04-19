@@ -8,12 +8,14 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
-
 import com.liera.lib_xxbring.XXBring;
 import com.liera.lib_xxbring.callback.XXBringInputStreamCallback;
 import com.liera.lib_xxbring.callback.XXBringJsonArrayCallback;
 import com.liera.lib_xxbring.callback.XXBringJsonObjectCallback;
 import com.liera.lib_xxbring.callback.XXBringTextCallback;
+import com.liera.lib_xxbring.handle.RequestManager;
+import com.liera.lib_xxbring.handle.RequestManagerFactory;
+import com.liera.lib_xxbring.handle.impl.HttpUrlConnectionRequestManager;
 import com.liera.lib_xxbring.request.IXXBringRequest;
 import com.liera.lib_xxbring.response.IXXBringResponse;
 import com.liera.xxbring.bean.MeRequestBodyBean;
@@ -24,7 +26,6 @@ import com.liera.xxbring.request.MePostUploadRequest;
 import com.liera.xxbring.response.MePostJsonArrayResponse;
 import com.liera.xxbring.response.MePostJsonObjectResponse;
 import com.liera.xxbring.response.MePostUploadResponse;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,6 +59,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mXXBring = new XXBring.Builder()
                 //是否打印日志
                 .setDebug(true)
+                //不设置请求器,默认是okhttp请求网络
+//                .setRequestManagerFactory(new RequestManagerFactory() {
+//                    @Override
+//                    public RequestManager create() {
+//                        //使用okhttp请求
+//                        return new OkHttpRequestManager();
+//                    }
+//                })
+                //重新定义请求器
+                .setRequestManagerFactory(new RequestManagerFactory() {
+                    @Override
+                    public RequestManager create() {
+                        //使用httpUrlConnection请求
+                        return new HttpUrlConnectionRequestManager();
+                    }
+                })
 //                //设置自己的请求网络框架,不设置默认是okhttp请求
 //                .setRequestManager()
 //                //是否打印全局请求json数据,默认是debug版本打印,正式版本不打印

@@ -12,6 +12,7 @@ import com.liera.lib_xxbring.callback.XXBringJsonArrayCallback;
 import com.liera.lib_xxbring.callback.XXBringJsonObjectCallback;
 import com.liera.lib_xxbring.callback.XXBringTextCallback;
 import com.liera.lib_xxbring.handle.RequestManager;
+import com.liera.lib_xxbring.handle.RequestManagerFactory;
 import com.liera.lib_xxbring.handle.impl.OkHttpRequestManager;
 import com.liera.lib_xxbring.request.IXXBringRequest;
 import com.liera.lib_xxbring.response.IXXBringResponse;
@@ -20,19 +21,25 @@ import com.liera.lib_xxbring.util.XXBringLog;
 public class XXBring {
 
     private static final String TAG = "XXBring";
-    private RequestManager requestManager;
+    private RequestManagerFactory requestManagerFactory;
     private boolean isShowJsonData;
 
-    private XXBring(boolean isDebug, RequestManager requestManager, boolean isShowJsonData) {
+    private XXBring(boolean isDebug, RequestManagerFactory requestManagerFactory, boolean isShowJsonData) {
         XXBringLog.isDebug(isDebug);
-        this.requestManager = requestManager;
+        if (requestManagerFactory == null) requestManagerFactory = new RequestManagerFactory() {
+            @Override
+            public RequestManager create() {
+                return new OkHttpRequestManager();
+            }
+        };
+        this.requestManagerFactory = requestManagerFactory;
         this.isShowJsonData = isShowJsonData;
     }
 
     public static class Builder {
 
         private boolean isDebug;
-        private RequestManager requestManager;
+        private RequestManagerFactory requestManagerFactory;
         private boolean isShowJsonData = BuildConfig.DEBUG;
 
         public Builder setDebug(boolean debug) {
@@ -41,8 +48,8 @@ public class XXBring {
         }
 
         //设置自己的网络请求框架
-        public Builder setRequestManager(RequestManager requestManager) {
-            this.requestManager = requestManager;
+        public Builder setRequestManagerFactory(RequestManagerFactory requestManagerFactory) {
+            this.requestManagerFactory = requestManagerFactory;
             return this;
         }
 
@@ -53,7 +60,7 @@ public class XXBring {
         }
 
         public XXBring build() {
-            return new XXBring(isDebug, requestManager, isShowJsonData);
+            return new XXBring(isDebug, requestManagerFactory, isShowJsonData);
         }
     }
 
@@ -110,10 +117,10 @@ public class XXBring {
     }
 
     private void requestCallback(IXXBringRequest req, Class<? extends IXXBringResponse> respClass, XXBringBaseCallback callback) {
-        new XXBringData(req, respClass, callback, requestManager != null ? requestManager : OkHttpRequestManager.create(), isShowJsonData).execute();
+        new XXBringData(req, respClass, callback, requestManagerFactory.create(), isShowJsonData).execute();
     }
 
-    public static void cancelRequest(Object...tag) {
+    public static void cancelRequest(Object... tag) {
         OkHttpRequestManager.cancel(tag);
     }
 
@@ -132,4 +139,6 @@ public class XXBring {
         NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
+
+
 }

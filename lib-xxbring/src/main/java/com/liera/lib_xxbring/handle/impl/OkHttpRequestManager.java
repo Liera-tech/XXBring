@@ -1,11 +1,13 @@
 package com.liera.lib_xxbring.handle.impl;
 
 import android.text.TextUtils;
-
-import com.google.gson.Gson;
-import com.liera.lib_xxbring.bean.XXBringData;
 import com.liera.lib_xxbring.bean.XXBringRequestBody;
-import com.liera.lib_xxbring.enums.HttpMethod;
+import com.liera.lib_xxbring.callback.XXBringBaseCallback;
+import com.liera.lib_xxbring.callback.XXBringByteArrayCallback;
+import com.liera.lib_xxbring.callback.XXBringInputStreamCallback;
+import com.liera.lib_xxbring.callback.XXBringJsonArrayCallback;
+import com.liera.lib_xxbring.callback.XXBringJsonObjectCallback;
+import com.liera.lib_xxbring.callback.XXBringTextCallback;
 import com.liera.lib_xxbring.handle.RequestManager;
 import com.liera.lib_xxbring.request.IXXBringRequest;
 import com.liera.lib_xxbring.request.impl.XXBringFileUploadRequest;
@@ -13,15 +15,14 @@ import com.liera.lib_xxbring.request.impl.XXBringPostBodyRequest;
 import com.liera.lib_xxbring.request.impl.XXBringPostParmeterRequest;
 import com.liera.lib_xxbring.util.ErrCode;
 import com.liera.lib_xxbring.util.XXBringLog;
-
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -36,13 +37,8 @@ import okhttp3.ResponseBody;
 public class OkHttpRequestManager extends RequestManager implements Callback {
 
     private static final String TAG = "OkHttpRequestManager";
-    private final static Gson mGson = new Gson();
 
     private static OkHttpClient okHttpClient;
-    private XXBringData mXXBringBean;
-
-    private OkHttpRequestManager() {
-    }
 
     static {
         okHttpClient = new OkHttpClient.Builder()
@@ -52,39 +48,41 @@ public class OkHttpRequestManager extends RequestManager implements Callback {
                 .build();
     }
 
-    public static RequestManager create() {
-        return new OkHttpRequestManager();
+    private static MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+
+    @Override
+    protected boolean runIsThread() {
+        return false;
     }
 
     @Override
-    public void execute(XXBringData bringBean) {
-        this.mXXBringBean = bringBean;
-        IXXBringRequest req = bringBean.getReq();
-        HttpMethod method = req.getMethod();
+    protected void getHandle() {
+        Request.Builder builder = setHeader("get");
 
-        if (method == HttpMethod.GET) {
-            getHandle();
+        String url;
+        try {
+            url = getUrl(mXXBringBean.getReq().getUrl(), "get");
+        } catch (Exception e) {
+            e.printStackTrace();
+            responseFail(ErrCode.REQUEST_EXCEPTION_ESCAPE, e);
             return;
         }
-        if (method == HttpMethod.POST) {
-            postHandle();
-            return;
+
+        try {
+            builder.url(url).get();
+            Request okRequest = builder.build();
+            okHttpClient.newCall(okRequest).enqueue(this);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            responseFail(ErrCode.REQUEST_EXCEPTION_REQUEST_ADDRESS, e);
         }
-        responseFail(ErrCode.REQUEST_EXCEPTION_NOT_IMPLEMENTED, new Exception("请求方式未实现"));
     }
 
-    private static MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
-
-    private void postHandle() {
-        Request.Builder builder = new Request.Builder();
-        Object requestTag = mXXBringBean.getReq().getRequestTag();
-        if (requestTag != null) {
-            builder.tag(requestTag);
-        }
+    @Override
+    protected void postHandle() {
+        Request.Builder builder = setHeader("post");
 
         final IXXBringRequest request = mXXBringBean.getReq();
-        setHeader("post", builder, request);
-
         String url = request.getUrl();
         XXBringLog.i(TAG, "post请求->完整请求地址:%s", url);
 
@@ -101,7 +99,15 @@ public class OkHttpRequestManager extends RequestManager implements Callback {
             setMultipartBodyParmeters(request, requestBody);
             builder.url(url).post(requestBody.build());
         } else {
-            responseFail(ErrCode.REQUEST_EXCEPTION_NOT_REQUEST, new Exception("请求类型未实现"));
+            Exception exception = new Exception("请求类型未实现");
+
+            try {
+                throw exception;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            responseFail(ErrCode.REQUEST_EXCEPTION_NOT_REQUEST, exception);
             return;
         }
 
@@ -126,7 +132,16 @@ public class OkHttpRequestManager extends RequestManager implements Callback {
             requestBody.addFormDataPart(fileFormatDataName, name, RequestBody.create(MEDIA_TYPE_IMAGE, file));
             return requestBody;
         }
-        responseFail(ErrCode.REQUEST_EXCEPTION_FILE_NOT_FOUND, new Exception("媒体文件不存在"));
+
+        Exception exception = new Exception("媒体文件不存在");
+
+        try {
+            throw exception;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        responseFail(ErrCode.REQUEST_EXCEPTION_FILE_NOT_FOUND, exception);
         return null;
     }
 
@@ -168,53 +183,15 @@ public class OkHttpRequestManager extends RequestManager implements Callback {
         return formBodyBuilder;
     }
 
-    private void getHandle() {
+    private Request.Builder setHeader(String httpMethod) {
         Request.Builder builder = new Request.Builder();
-        Object requestTag = mXXBringBean.getReq().getRequestTag();
+        IXXBringRequest req = mXXBringBean.getReq();
+        Object requestTag = req.getRequestTag();
         if (requestTag != null) {
             builder.tag(requestTag);
         }
 
-        final IXXBringRequest request = mXXBringBean.getReq();
-
-        setHeader("get", builder, request);
-
-        Map<String, Object> params = request.getParameters();
-        StringBuilder stringBuilder = new StringBuilder(request.getUrl());
-        if (params != null && !params.isEmpty()) {
-            stringBuilder.append("?");
-            for (String key : params.keySet()) {
-                Object value = params.get(key);
-                XXBringLog.i(TAG, "get请求->请求参数:%s:%s", key, value);
-                try {
-                    stringBuilder
-                            .append(key)
-                            .append("=")
-                            .append(URLEncoder.encode(String.valueOf(value), "UTF-8"))
-                            .append("&");
-                } catch (final UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                    responseFail(ErrCode.REQUEST_EXCEPTION_ESCAPE, e);
-                    return;
-                }
-            }
-        }
-
-        String toString = stringBuilder.toString();
-        XXBringLog.i(TAG, "get请求--完整请求地址:%s", toString);
-        try {
-            builder.url(toString).get();
-            Request okRequest = builder.build();
-            okHttpClient.newCall(okRequest).enqueue(this);
-        } catch (final Exception e) {
-            e.printStackTrace();
-            responseFail(ErrCode.REQUEST_EXCEPTION_REQUEST_ADDRESS, e);
-        }
-    }
-
-
-    private void setHeader(String httpMethod, Request.Builder builder, IXXBringRequest request) {
-        Map<String, Object> header = request.getHeaders();
+        Map<String, Object> header = req.getHeaders();
         if (header != null && !header.isEmpty()) {
             for (String key : header.keySet()) {
                 Object value = header.get(key);
@@ -231,10 +208,7 @@ public class OkHttpRequestManager extends RequestManager implements Callback {
                 }
             }
         }
-    }
-
-    private void responseFail(final int errCode, final Exception e) {
-        mXXBringBean.responseFail(errCode, e);
+        return builder;
     }
 
     @Override
@@ -245,6 +219,12 @@ public class OkHttpRequestManager extends RequestManager implements Callback {
         }
         XXBringLog.i(TAG, "数据响应异常:%s", e);
         call.cancel();
+
+        try {
+            throw e;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
         responseFail(ErrCode.RESPONSE_EXCEPTION_FAIL, e);
     }
 
@@ -257,17 +237,111 @@ public class OkHttpRequestManager extends RequestManager implements Callback {
 
         boolean successful = response.isSuccessful();
         if (!successful) {
-            responseFail(response.code(), new Exception("请求响应失败"));
+            int code = response.code();
+            Exception exception = new Exception(code+ "异常");
+            try {
+                throw exception;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            responseFail(code, exception);
             return;
         }
 
         ResponseBody body = response.body();
-        responseSuccess(body);
-        response.close();
-    }
+        XXBringBaseCallback callback = mXXBringBean.getCallback();
+        IXXBringRequest req = mXXBringBean.getReq();
 
-    private void responseSuccess(ResponseBody body) {
-        mXXBringBean.responseSuccess(body, mGson);
+        if (callback instanceof XXBringJsonObjectCallback) {
+            XXBringLog.i(TAG, "jsonObject回调tag:" + req.getRequestTag());
+            if (!req.isShowJsonData() || !mXXBringBean.isShowJsonData()) {
+                Reader reader = body.charStream();
+                responseJsonReader(reader);
+
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                response.close();
+                return;
+            }
+            try {
+                String string = body.string();
+                XXBringLog.i(TAG, "tag:" + req.getRequestTag() + "响应数据:%s", string);
+                responseData(string);
+            } catch (IOException e) {
+                e.printStackTrace();
+                responseFail(ErrCode.RESPONSE_EXCEPTION_STRING, e);
+            }
+            response.close();
+            return;
+        }
+        if (callback instanceof XXBringJsonArrayCallback) {
+            XXBringLog.i(TAG, "jsonArray回调tag:" + req.getRequestTag());
+
+            if (!req.isShowJsonData() || !mXXBringBean.isShowJsonData()) {
+                Reader reader = body.charStream();
+                responseJsonReader(reader);
+
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                response.close();
+                return;
+            }
+
+            try {
+                String string = body.string();
+                XXBringLog.i(TAG, "tag:" + req.getRequestTag() + "响应数据:%s", string);
+                responseData(string);
+            } catch (IOException e) {
+                e.printStackTrace();
+                responseFail(ErrCode.RESPONSE_EXCEPTION_STRING, e);
+            }
+            response.close();
+            return;
+        }
+        if (callback instanceof XXBringTextCallback) {
+            XXBringLog.i(TAG, "text回调tag:" + req.getRequestTag());
+            try {
+                final String string = body.string();
+                XXBringLog.i(TAG, "tag:" + req.getRequestTag() + "响应数据:%s", string);
+                responseData(string);
+            } catch (IOException e) {
+                e.printStackTrace();
+                responseFail(ErrCode.RESPONSE_EXCEPTION_STRING, e);
+            }
+            response.close();
+            return;
+        }
+
+        if (callback instanceof XXBringByteArrayCallback) {
+            XXBringLog.i(TAG, "byteArray回调tag:" + req.getRequestTag());
+
+            try {
+                responseByteArray(body.bytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+                responseFail(ErrCode.RESPONSE_EXCEPTION_BYTE_ARRAY, e);
+            }
+            response.close();
+            return;
+        }
+        if (callback instanceof XXBringInputStreamCallback) {
+            XXBringLog.i(TAG, "inputStream回调tag:" + req.getRequestTag());
+            try {
+                responseInputStream(body.byteStream());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            response.close();
+            return;
+        }
+        responseOther();
+        response.close();
     }
 
     public static void cancel(Object... requestTag) {
