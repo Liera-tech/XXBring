@@ -30,7 +30,7 @@ allprojects {
 
 ​    
 
-### API使用  
+#### 3.构建XXBring  
 
 ```
 //配置请求,这个可以放到一个统一的地方
@@ -52,70 +52,49 @@ XXBring mXXBring = new XXBring.Builder()
 
 ​        
 
-### 回调为jsonObject类型的请求
+#### 4.请求访问
 
-#### @param req       请求体
-
-#### @param respClass object字节码
-
-#### @param callback  jsonObject回调
-
-##### mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClass, XXBringJsonObjectCallback callback);
-
+```
+注意: Request请求子类继承以下情况:
+XXBringGetRequest(Get请求)
+XXBringPostBodyRequest(post请求发送Json数据)
+XXBringPostParmeterRequest(post请求携带参数)
+XXBringFileUploadRequest(文件上传请求)
 
 
-### 回调为jsonArray类型的请求
-
-#### @param req       请求体
-
-#### @param respClass object字节码
-
-#### @param callback  jsonArray回调
-
-##### mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClass, XXBringJsonArrayCallback callback);
+回调为jsonObject类型的请求
+@param req       请求体
+@param respClass object字节码
+@param callback  jsonObject回调
+mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClass, XXBringJsonObjectCallback callback);
 
 
-
-### 回调为inputStream类型的请求
-
-#### @param req      请求体
-
-#### @param callback inputStream回调
-
-##### mXXBring.request(IXXBringRequest req, XXBringInputStreamCallback callback);
+回调为jsonArray类型的请求
+@param req       请求体
+@param respClass object字节码
+@param callback  jsonArray回调
+mXXBring.request(IXXBringRequest req, Class<? extends IXXBringResponse> respClass, XXBringJsonArrayCallback callback);
 
 
-
-### 回调为byteArray类型的请求
-
-#### @param req      请求体
-
-#### @param callback byteArray回调
-
-##### mXXBring.request(IXXBringRequest req, XXBringByteArrayCallback callback);
+回调为inputStream类型的请求
+@param req      请求体
+@param callback inputStream回调
+mXXBring.request(IXXBringRequest req, XXBringInputStreamCallback callback);
 
 
-
-### 回调为text类型的请求
-#### @param req      请求体
-
-#### @param callback text回调
-
-##### mXXBring.request(IXXBringRequest req, XXBringTextCallback callback);
+回调为byteArray类型的请求
+@param req      请求体
+@param callback byteArray回调
+mXXBring.request(IXXBringRequest req, XXBringByteArrayCallback callback);
 
 
+回调为text类型的请求
+@param req      请求体
+@param callback text回调
+mXXBring.request(IXXBringRequest req, XXBringTextCallback callback);
+```
 
-### 请求支持以下情况:
-
-##### XXBringFileUploadRequest(文件上传请求)
-
-##### XXBringGetRequest(Get请求)
-
-##### XXBringPostBodyRequest(post请求发送Json数据)
-
-##### XXBringPostParmeterRequest(post请求携带参数)
-
-
+###   
 
 ### 响应回调支持如下类型:
 
@@ -129,7 +108,7 @@ XXBring mXXBring = new XXBring.Builder()
 
 ##### XXBringTextCallback(响应结果为纯文本)
 
-
+###   
 
 ### 请求中可通过配置请求设置如下:
 
@@ -139,7 +118,7 @@ XXBring mXXBring = new XXBring.Builder()
 
 ##### String getUrl();
 
-
+####   
 
 #### 为请求设置一个tag
 
@@ -147,7 +126,7 @@ XXBring mXXBring = new XXBring.Builder()
 
 ##### Object getRequestTag();
 
-
+####   
 
 #### 请求方式
 
@@ -155,7 +134,7 @@ XXBring mXXBring = new XXBring.Builder()
 
 ##### HttpMethod getMethod();
 
-
+####   
 
 #### 请求头
 
@@ -163,7 +142,7 @@ XXBring mXXBring = new XXBring.Builder()
 
 ##### Map<String, Object> getHeaders();
 
-
+####   
 
 #### 请求参数
 
@@ -171,7 +150,7 @@ XXBring mXXBring = new XXBring.Builder()
 
 ##### Map<String, Object> getParameters();
 
-
+####   
 
 #### 响应数据成功是否在子线程
 
@@ -183,7 +162,7 @@ XXBring mXXBring = new XXBring.Builder()
 
 ##### boolean isResponseSuccessThread();
 
-
+####   
 
 #### 响应数据失败是否在子线程
 
@@ -195,7 +174,7 @@ XXBring mXXBring = new XXBring.Builder()
 
 ##### boolean isResponseFailThread();
 
-
+####   
 
 #### 响应数据为json格式时有效
 
