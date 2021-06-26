@@ -1,6 +1,7 @@
 package com.liera.lib_xxbring.handle.impl;
 
 import android.text.TextUtils;
+
 import com.liera.lib_xxbring.bean.XXBringRequestBody;
 import com.liera.lib_xxbring.callback.XXBringBaseCallback;
 import com.liera.lib_xxbring.callback.XXBringByteArrayCallback;
@@ -15,6 +16,7 @@ import com.liera.lib_xxbring.request.impl.XXBringPostBodyRequest;
 import com.liera.lib_xxbring.request.impl.XXBringPostParmeterRequest;
 import com.liera.lib_xxbring.util.ErrCode;
 import com.liera.lib_xxbring.util.XXBringLog;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -23,6 +25,7 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -99,15 +102,12 @@ public class OkHttpRequestManager extends RequestManager implements Callback {
             setMultipartBodyParmeters(request, requestBody);
             builder.url(url).post(requestBody.build());
         } else {
-            Exception exception = new Exception("请求类型未实现");
-
             try {
-                throw exception;
+                throw new Exception("请求类型未实现");
             } catch (Exception e) {
                 e.printStackTrace();
+                responseFail(ErrCode.REQUEST_EXCEPTION_NOT_REQUEST, e);
             }
-
-            responseFail(ErrCode.REQUEST_EXCEPTION_NOT_REQUEST, exception);
             return;
         }
 
@@ -238,7 +238,7 @@ public class OkHttpRequestManager extends RequestManager implements Callback {
         boolean successful = response.isSuccessful();
         if (!successful) {
             int code = response.code();
-            Exception exception = new Exception(code+ "异常");
+            Exception exception = new Exception(code + "异常");
             try {
                 throw exception;
             } catch (Exception e) {
